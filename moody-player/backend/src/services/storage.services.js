@@ -8,10 +8,10 @@ var imagekit = new ImageKit({
     urlEndpoint: process.env.IMAGEKIT_URLENDPOINTS
 });
 
-async function imageUpload(file) {
+async function imageUpload(fileData) {
     return new Promise((resolve, reject) => (
         imagekit.upload({
-            file: file.buffer,
+            file: fileData.buffer,
             fileName: `${uuidv4()}`,
             folder: 'music-player'
         }, (error, result) => {

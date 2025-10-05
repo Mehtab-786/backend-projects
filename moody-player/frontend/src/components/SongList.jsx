@@ -1,6 +1,16 @@
-import React from "react";
+import React, { useState } from "react";
 
 function SongList({ song }) {
+  const [isPlaying, setisPlaying] = useState(null)
+
+  const handleClick = (index) => {
+    if(isPlaying === index) {
+      setisPlaying(null)
+    }else setisPlaying(index)
+  };
+
+  
+
   return (
     <div className="flex flex-col w-full border-t border-neutral-800 pt-4 space-y-3">
       {song.map((song, index) => (
@@ -12,8 +22,12 @@ function SongList({ song }) {
             <h2 className="text-white font-medium text-lg">{song.name}</h2>
             <p className="text-gray-400 text-sm">{song.author}</p>
           </div>
-          <button className="flex justify-center items-center w-10 h-10 rounded-full border border-gray-600 text-gray-300 hover:text-pink-400 hover:border-pink-400 transition-all">
-            ▶
+          {isPlaying === index && <audio src={song.audio} autoPlay={index === isPlaying} style={{display:'none'}} />}
+          <button
+            onClick={() => handleClick(index)}
+            className="flex justify-center items-center w-10 h-10 rounded-full border border-gray-600 text-gray-300 hover:text-pink-400 hover:border-pink-400 transition-all"
+          >
+            {isPlaying === index ? "Pause" : "Play"}
           </button>
         </div>
       ))}
