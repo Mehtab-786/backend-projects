@@ -6,7 +6,7 @@ const chatSchema = new Schema({
         required: true,
         trim: true
     },
-    createdBy: {
+    user: {
         type: Schema.Types.ObjectId,
         ref: 'User',
         required: true

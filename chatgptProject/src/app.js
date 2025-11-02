@@ -14,4 +14,4 @@ app.use(express.json());
 app.use('/api/user',userRouter);
 app.use('/api/chat',chatRouter);
 
-export default app
+export default app;
