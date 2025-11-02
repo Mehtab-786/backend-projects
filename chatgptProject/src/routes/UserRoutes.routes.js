@@ -1,38 +1,10 @@
 import { Router } from 'express';
-import { User } from '../models/UserModel.models.js'
-import bcrypt from 'bcrypt'
+import { loginUser, registerUser } from '../controllers/user.controllers.js';
 
 const router = Router();
 
-router.route('/register').post(async (req, res) => {
-    const { username, email, password } = req.body;
-
-    const isUser = await User.findOne({ email });
-
-    if (isUser) {
-        return res.status(401).json({
-            message: "User already exists !",
-            isUser,
-        })
-    };
-
-    const hashedPassword = await bcrypt.hash(password, 10)
-
-    const user = await User.create({ username, email, password: hashedPassword })
-
-    if (!user) {
-        return res.status(400).json({
-            message: "Error while registering user"
-        })
-    }
-
-    //token genrate 
-    //save in cookie by cookie parser
-
-
-    return res.status(200).send('hello')
-
-})
+router.route('/register').post(registerUser)
+router.route('/login').post(loginUser)
 
 
 export default router;

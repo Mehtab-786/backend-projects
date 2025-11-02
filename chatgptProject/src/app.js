@@ -1,9 +1,13 @@
 import {config} from 'dotenv';
 config();
+import cookieParser from 'cookie-parser'
 import express from 'express';
 import userRouter from './routes/UserRoutes.routes.js'
 
 const app = express()
+
+app.use(cookieParser())
+
 app.use(express.json())
 
 
