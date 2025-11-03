@@ -1,15 +1,15 @@
 import jwt from "jsonwebtoken";
 import { Server } from "socket.io";
 import cookie from 'cookie'
-import { User } from "../models/UserModel.models";
+import { User } from "../models/UserModel.models.js";
+import { generateContent } from "./ai.services.js";
+import { Message } from "../models/messageModel.model.js";
 
 async function socketServer(httpServer) {
     const io = new Server(httpServer, {});
 
     io.use(async (socket, next) => {
         const cookies = cookie.parse(socket.handshake.headers?.cookie);
-
-        console.log(cookies)
 
         if (!cookies.token) {
             next(new Error('Access denied ! No token provided'))
@@ -28,6 +28,28 @@ async function socketServer(httpServer) {
 
     io.on("connection", (socket) => {
         console.log("socket connected ::", socket.id)
+
+        socket.on("question-asked", async(payload) => {
+
+            await Message.create({
+                content:payload.message,
+                role:"user",
+                chat:payload.chat,
+                user:socket.user._id
+            });
+                
+            const reply = await generateContent(payload.message);
+
+            await Message.create({
+                content:reply,
+                role:"model",
+                chat:payload.chat,
+                user:socket.user._id
+            });
+
+            socket.emit("answer-replied", reply)
+
+        })
     });
 };
 
