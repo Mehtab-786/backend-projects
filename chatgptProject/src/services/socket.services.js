@@ -17,7 +17,7 @@ async function socketServer(httpServer) {
 
         try {
             const decoded = jwt.verify(cookies.token, process.env.JWT_SECRET)
-            const user =  await User.findById(decoded.userId)
+            const user = await User.findById(decoded.userId)
             socket.user = user
             next()
         } catch (error) {
@@ -29,22 +29,38 @@ async function socketServer(httpServer) {
     io.on("connection", (socket) => {
         console.log("socket connected ::", socket.id)
 
-        socket.on("question-asked", async(payload) => {
+        socket.on("question-asked", async (payload) => {
 
             await Message.create({
-                content:payload.message,
-                role:"user",
-                chat:payload.chat,
-                user:socket.user._id
+                content: payload.message,
+                role: "user",
+                chat: payload.chat,
+                user: socket.user._id
             });
-                
-            const reply = await generateContent(payload.message);
+
+
+            const chatHistory = await Message.find({ chat: payload.chat })
+
+            // console.log('chat history  ,', chatHistory.map(item => {
+            //     return {
+            //         role: item.role,
+            //         parts: [{ text: item.content }]
+            //     }
+            // }))
+
+
+            const reply = await generateContent(chatHistory.map(item => {
+                return {
+                    role: item.role,
+                    parts: [{ text: item.content }]
+                }
+            }));
 
             await Message.create({
-                content:reply,
-                role:"model",
-                chat:payload.chat,
-                user:socket.user._id
+                content: reply,
+                role: "model",
+                chat: payload.chat,
+                user: socket.user._id
             });
 
             socket.emit("answer-replied", reply)
