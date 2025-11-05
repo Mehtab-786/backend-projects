@@ -39,17 +39,18 @@ async function socketServer(httpServer) {
             });
 
 
+            const MAX_TURNS = 5;
+
             const chatHistory = await Message.find({ chat: payload.chat })
+                .select("role content createdAt")
+                .sort({ createdAt: -1 })
+                .limit(MAX_TURNS)
+                .lean();
 
-            // console.log('chat history  ,', chatHistory.map(item => {
-            //     return {
-            //         role: item.role,
-            //         parts: [{ text: item.content }]
-            //     }
-            // }))
+            console.log(chatHistory);
 
 
-            const reply = await generateContent(chatHistory.map(item => {
+            const reply = await generateContent(chatHistory.reverse().map(item => {
                 return {
                     role: item.role,
                     parts: [{ text: item.content }]
