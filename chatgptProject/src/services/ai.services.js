@@ -11,6 +11,20 @@ async function generateContent(prompt) {
         }
     });
     return response.text;
+};
+
+async function generateVectors(prompt) {
+
+    const ai = new GoogleGenAI({});
+    const response = await ai.models.embedContent({
+        model: 'gemini-embedding-001',
+        contents: prompt,
+        config:{
+            outputDimensionality:768
+        }
+    });
+
+    return response.embeddings[0].values;
 }
 
-export { generateContent }
+export { generateContent, generateVectors }
