@@ -41,6 +41,16 @@ async function socketServer(httpServer) {
 
             const userVectors = await generateVectors(payload.message);
 
+
+            const memory = await queryMemory({
+                metadata: {
+                    // user : socket.user._id
+                },
+                queryVector: userVectors,
+                limit: 3
+            })
+
+
             await createMemory({
                 messageId: userMessage._id,
                 vectors: userVectors,
@@ -61,12 +71,25 @@ async function socketServer(httpServer) {
                 .lean();
 
 
-            const reply = await generateContent(chatHistory.reverse().map(item => {
+            const stm = chatHistory.reverse().map(item => {
                 return {
                     role: item.role,
                     parts: [{ text: item.content }]
                 }
-            }));
+            })
+
+            const ltm = [
+                {
+                    role: "user",
+                    parts: [{
+                        text: `these are some previous messages from the chat, use them to generate a response 
+                        ${memory.map(item => item.metadata.text).join("\n")}
+                        `
+                    }]
+                }
+            ]
+
+            const reply = await generateContent([...ltm, ...stm]);
 
             const aiMessage = await Message.create({
                 content: reply,
