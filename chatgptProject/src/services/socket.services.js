@@ -32,24 +32,15 @@ async function socketServer(httpServer) {
 
         socket.on("question-asked", async (payload) => {
 
-            const userMessage = await Message.create({
-                content: payload.message,
-                role: "user",
-                chat: payload.chat,
-                user: socket.user._id
-            });
-
-            const userVectors = await generateVectors(payload.message);
-
-
-            const memory = await queryMemory({
-                metadata: {
-                    // user : socket.user._id
-                },
-                queryVector: userVectors,
-                limit: 3
-            })
-
+            const [userMessage, userVectors] = await Promise.all([
+                await Message.create({
+                    content: payload.message,
+                    role: "user",
+                    chat: payload.chat,
+                    user: socket.user._id
+                }),
+                await generateVectors(payload.message)
+            ]);
 
             await createMemory({
                 messageId: userMessage._id,
@@ -61,22 +52,29 @@ async function socketServer(httpServer) {
                 }
             })
 
-
             const MAX_TURNS = 5;
 
-            const chatHistory = await Message.find({ chat: payload.chat })
-                .select("role content createdAt")
-                .sort({ createdAt: -1 })
-                .limit(MAX_TURNS)
-                .lean();
-
+            const [memory, chatHistory] = await Promise.all([
+                await queryMemory({
+                    metadata: {
+                        user: socket.user._id
+                    },
+                    queryVector: userVectors,
+                    limit: 3
+                }),
+                await Message.find({ chat: payload.chat })
+                    .select("role content createdAt")
+                    .sort({ createdAt: -1 })
+                    .limit(MAX_TURNS)
+                    .lean()
+            ])
 
             const stm = chatHistory.reverse().map(item => {
                 return {
                     role: item.role,
                     parts: [{ text: item.content }]
                 }
-            })
+            });
 
             const ltm = [
                 {
@@ -87,18 +85,21 @@ async function socketServer(httpServer) {
                         `
                     }]
                 }
-            ]
+            ];
 
             const reply = await generateContent([...ltm, ...stm]);
 
-            const aiMessage = await Message.create({
-                content: reply,
-                role: "model",
-                chat: payload.chat,
-                user: socket.user._id
-            });
+            socket.emit("answer-replied", reply)
 
-            const aiVectors = await generateVectors(reply);
+            const [aiVectors, aiMessage] = await Promise.all([
+                await generateVectors(reply),
+                await Message.create({
+                    content: reply,
+                    role: "model",
+                    chat: payload.chat,
+                    user: socket.user._id
+                })
+            ]);
 
             await createMemory({
                 messageId: aiMessage._id,
@@ -108,9 +109,7 @@ async function socketServer(httpServer) {
                     user: socket.user._id,
                     text: reply
                 }
-            })
-
-            socket.emit("answer-replied", reply)
+            });
 
         })
     });
