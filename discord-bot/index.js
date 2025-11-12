@@ -14,7 +14,10 @@ client.once('clientReady',() => {
 });
 
 client.on('messageCreate', (message) => {
-    console.log('Message recieved : ', message.content)
+    if(message.author.bot) return;
+    console.log(message);
+    
+    message.reply('hellioo, replied to this message')
 })
 
 client.login(process.env.DISCORD_BOT_TOKEN)
