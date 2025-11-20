@@ -73,6 +73,6 @@ async function updateTask(req, res) {
         message: 'Task updated successfully',
         taskEdited
     });
-}
+};
 
-export {allTask, deleteTask, taskCreate, updateTask}
+export {allTask, deleteTask, taskCreate, updateTask};
