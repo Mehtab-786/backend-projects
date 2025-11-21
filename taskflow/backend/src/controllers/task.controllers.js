@@ -75,4 +75,14 @@ async function updateTask(req, res) {
     });
 };
 
-export {allTask, deleteTask, taskCreate, updateTask};
+async function updateCompleted(req, res) {
+    const params = req?.params?.id;
+    const {completed} = req?.body;
+    const taskUPdated = await taskModel.findByIdAndUpdate(params, {completed}, {new:true});
+    
+    res.status(200).json({
+        message: 'Task Status changed',
+        taskUPdated
+    });
+}
+export {allTask, deleteTask, taskCreate, updateTask, updateCompleted};
