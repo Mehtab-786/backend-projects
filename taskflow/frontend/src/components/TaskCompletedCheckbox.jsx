@@ -4,20 +4,16 @@ import { useTodos } from "../context/TodoContext";
 function TaskCompletedCheckbox({ task }) {
   const { updateCompletedHandler } = useTodos();
 
-  return (
-    <>
-      {task.completed ? (
-        <CheckSquare
-          onClick={() => updateCompletedHandler(task._id, !task.completed)}
-          className={`w-6 h-6 cursor-pointer text-green-600`}
-        />
-      ) : (
-        <Square
-          onClick={() => updateCompletedHandler(task._id, !task.completed)}
-          className={`w-6 h-6 cursor-pointer text-gray-400 `}
-        />
-      )}
-    </>
+  return task.completed ? (
+    <CheckSquare
+      onClick={() => updateCompletedHandler(task._id, false)}
+      className="w-7 h-7 cursor-pointer text-emerald-600 hover:scale-105 transition-transform"
+    />
+  ) : (
+    <Square
+      onClick={() => updateCompletedHandler(task._id, true)}
+      className="w-7 h-7 cursor-pointer text-slate-300 hover:text-slate-400 hover:scale-105 transition-all"
+    />
   );
 }
 
