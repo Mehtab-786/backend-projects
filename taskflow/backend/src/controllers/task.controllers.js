@@ -18,8 +18,12 @@ async function taskCreate(req, res) {
                 message: 'Task is required or task is too short'
             });
         };
+
+        const user = req.user;
+        
         const resp = await taskModel.create({
             task,
+            owner:user._id,
             completed: false
         });
 
@@ -31,7 +35,6 @@ async function taskCreate(req, res) {
         console.log('Error while creating task :: ', error)
     }
 };
-
 
 async function allTask(req, res) {
     const tasks = await taskModel.find().select("-createdAt -updatedAt -__v ");

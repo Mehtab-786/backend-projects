@@ -7,11 +7,11 @@ const taskSchema = new Schema({
         unique: true,
         trim: true
     },
-    // owner : {
-    //     type: Schema.Types.ObjectId,
-    //     ref : 'User',
-    //     required:true
-    // }
+    owner : {
+        type: Schema.Types.ObjectId,
+        ref : 'User',
+        required:true
+    },
     completed: {
         type: Boolean,
         default: true

@@ -1,5 +1,5 @@
 import axios from 'axios'
-const url = import.meta.env.VITE_API_URL
+const url = import.meta.env.VITE_API_URL_TASKS
 
 export async function getAllTasks() {
     const allTask = await axios.get(`${url}/tasks`)
