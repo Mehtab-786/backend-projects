@@ -2,6 +2,14 @@ import { UserModel } from '../models/user.model.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
+const cookieOptions = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+    path: "/",
+};
+
 const registerUser = async (req, res) => {
     const { username, email, password } = req.body;
 
@@ -31,7 +39,10 @@ const registerUser = async (req, res) => {
 
     const token = await jwt.sign({ id: user._id }, process.env.JWT_SECRET);
 
-    res.cookie('token', token);
+
+
+
+    res.cookie('token', token, cookieOptions);
 
     return res.status(201).json({
         message: "User registered successfully ",
@@ -39,7 +50,6 @@ const registerUser = async (req, res) => {
         token
     });
 };
-
 
 const loginUser = async (req, res) => {
     const { email, password } = req.body;
@@ -68,7 +78,7 @@ const loginUser = async (req, res) => {
 
     const token = await jwt.sign({ id: user._id }, process.env.JWT_SECRET)
 
-    res.cookie('token', token);
+    res.cookie('token', token, cookieOptions);
 
     return res.status(200).json({
         message: "User Logged In successfully ",
