@@ -1,7 +1,10 @@
 import TodoForm from "../components/TodoForm";
 import AllTask from "../components/AllTask";
+import { useAuth } from "../context/AuthContext";
 
 function HomePage() {
+  const {logoutUser} = useAuth();
+
   return (
      <div className="min-h-screen bg-linear-to-b from-slate-50 to-slate-100 py-10 px-4">
       <div className="max-w-3xl mx-auto">
@@ -16,9 +19,9 @@ function HomePage() {
               </p>
             </div>
             <div className="hidden sm:flex items-center gap-3">
-              <span className="text-xs text-slate-500">
-                Built with React + Tailwind
-              </span>
+              <button type="button" className="text-xl font-bold text-red-500 cursor-pointer" 
+                onClick={() => logoutUser()}
+              >Logout</button>
             </div>
           </div>
         </header>

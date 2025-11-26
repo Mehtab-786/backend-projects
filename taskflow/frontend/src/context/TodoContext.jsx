@@ -5,8 +5,9 @@ import {
   newTask,
   updateCompleted,
   updateTask,
-} from "../Services/Api";
+} from "../Services/TaskApi";
 import { toast } from "sonner";
+import { useAuth } from "./AuthContext";
 
 const TodoContext = createContext(null);
 
@@ -32,9 +33,16 @@ export const TodoProvider = ({ children }) => {
     }
   }
 
+  const { user, globalLoading: loading } = useAuth();
+
   useEffect(() => {
-    fetchAll();
-  }, []);
+    if (user && !loading) {
+      fetchAll();
+    }
+    if (user == null && !loading) {
+      setAllTask([])
+    }
+  }, [loading, user]);
 
   const handleNewTask = async (e) => {
     if (e && e.preventDefault) e.preventDefault();
@@ -43,9 +51,8 @@ export const TodoProvider = ({ children }) => {
       return toast.warning("Task length must be more than 2");
     try {
       await newTask(trimmed);
-      toast.success("New Task added");
       setTaskInput("");
-      fetchAll()
+      fetchAll();
     } catch (err) {
       console.log("Error while creating new task ::", err);
       toast.error(err?.response?.data?.message || "Failed to create");
@@ -57,7 +64,6 @@ export const TodoProvider = ({ children }) => {
       setGlobalLoading(true);
       await deleteTask(id);
       await fetchAll();
-      toast.success("Deleted");
     } catch (error) {
       toast.warning(
         error?.response?.data?.message || "Failed to delete Task !"
@@ -65,9 +71,6 @@ export const TodoProvider = ({ children }) => {
     } finally {
       setGlobalLoading(false);
     }
-    await deleteTask(id)
-      .then((res) => toast.success(res?.data?.message))
-      .catch((err) => toast.warning(err?.response?.data?.message));
   };
 
   const cancelEditHandler = () => {
@@ -84,7 +87,6 @@ export const TodoProvider = ({ children }) => {
     try {
       setGlobalLoading(true);
       await updateTask(id, task);
-      toast.success("Task updated Successfully");
       await fetchAll();
       cancelEditHandler();
     } catch (error) {

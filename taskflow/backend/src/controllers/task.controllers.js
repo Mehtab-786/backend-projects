@@ -4,8 +4,9 @@ import mongoose from 'mongoose';
 async function taskCreate(req, res) {
     try {
         const { task } = req.body;
+        const user = req.user;
 
-        let taskAlreadyCreated = await taskModel.findOne({task})
+        let taskAlreadyCreated = await taskModel.findOne({task:task,owner:user._id})
 
         if(taskAlreadyCreated){
             return res.status(400).json({
@@ -19,7 +20,7 @@ async function taskCreate(req, res) {
             });
         };
 
-        const user = req.user;
+        
         
         const resp = await taskModel.create({
             task,
@@ -37,8 +38,10 @@ async function taskCreate(req, res) {
 };
 
 async function allTask(req, res) {
-    const tasks = await taskModel.find().select("-createdAt -updatedAt -__v ");
 
+    const tasks = await taskModel.find({owner:req.user?._id}).select("-createdAt -updatedAt -__v ");
+
+    
     return res.status(200).json({
         message: "All task",
         tasks
